@@ -145,8 +145,21 @@ RegisterNetEvent('qb-policejob:server:evidence', function(currentEvidence)
     })
 end)
 
+local unsafeTags = {
+    "<script", "</script", "<img", "<iframe", "<object", "<embed", "<svg",
+    "<link", "<style", "<meta", "<html", "<body", "<video", "<audio", "<a"
+}
+
 RegisterNetEvent('police:server:policeAlert', function(text)
     local src = source
+
+    local lowerText = string.lower(text or "")
+    for _, tag in pairs(unsafeTags) do
+        if string.find(lowerText, tag) then
+            return 
+        end
+    end
+
     local ped = GetPlayerPed(src)
     local coords = GetEntityCoords(ped)
     local players = QBCore.Functions.GetQBPlayers()
