@@ -47,7 +47,7 @@ AddEventHandler('onResourceStart', function(resourceName)
     end
 end)
 
-AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
+RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
     local player = QBCore.Functions.GetPlayerData()
     PlayerJob = player.job
     isHandcuffed = false
