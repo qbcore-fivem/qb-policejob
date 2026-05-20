@@ -1,3 +1,42 @@
+local sharedItems = exports['qb-core']:GetShared('Items')
+local sharedVehicles = exports['qb-core']:GetShared('Vehicles')
+
+local function Round(value, numDecimalPlaces)
+    if not numDecimalPlaces then return math.floor(value + 0.5) end
+    local power = 10 ^ numDecimalPlaces
+    return math.floor((value * power) + 0.5) / (power)
+end
+
+local function ChangeVehicleExtra(vehicle, extra, enable)
+    if DoesExtraExist(vehicle, extra) then
+        if enable then
+            SetVehicleExtra(vehicle, extra, false)
+            if not IsVehicleExtraTurnedOn(vehicle, extra) then
+                ChangeVehicleExtra(vehicle, extra, enable)
+            end
+        else
+            SetVehicleExtra(vehicle, extra, true)
+            if IsVehicleExtraTurnedOn(vehicle, extra) then
+                ChangeVehicleExtra(vehicle, extra, enable)
+            end
+        end
+    end
+end
+
+local function SetDefaultVehicleExtras(vehicle, config)
+    for i = 1, 20 do
+        if DoesExtraExist(vehicle, i) then
+            SetVehicleExtra(vehicle, i, 1)
+        end
+    end
+    for id, enabled in pairs(config) do
+        if type(enabled) ~= 'boolean' then
+            enabled = true
+        end
+        ChangeVehicleExtra(vehicle, tonumber(id), enabled)
+    end
+end
+
 -- Variables
 local currentGarage = 0
 local inFingerprint = false
@@ -49,7 +88,7 @@ end
 local function SetCarItemsInfo()
     local items = {}
     for _, item in pairs(Config.CarItems) do
-        local itemInfo = QBCore.Shared.Items[item.name:lower()]
+        local itemInfo = sharedItems[item.name:lower()]
         if itemInfo then
             items[#items + 1] = {
                 name = itemInfo.name,
@@ -144,7 +183,7 @@ function TakeOutVehicle(vehicleInfo)
             closeMenuFull()
             if Config.VehicleSettings[vehicleInfo] ~= nil then
                 if Config.VehicleSettings[vehicleInfo].extras ~= nil then
-                    QBCore.Shared.SetDefaultVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
+                    SetDefaultVehicleExtras(veh, Config.VehicleSettings[vehicleInfo].extras)
                 end
                 if Config.VehicleSettings[vehicleInfo].livery ~= nil then
                     SetVehicleLivery(veh, Config.VehicleSettings[vehicleInfo].livery)
@@ -210,9 +249,9 @@ function MenuImpound(currentSelection)
         else
             shouldContinue = true
             for _, v in pairs(result) do
-                local enginePercent = QBCore.Shared.Round(v.engine / 10, 0)
+                local enginePercent = Round(v.engine / 10, 0)
                 local currentFuel = v.fuel
-                local vname = QBCore.Shared.Vehicles[v.vehicle].name
+                local vname = sharedVehicles[v.vehicle].name
 
                 impoundMenu[#impoundMenu + 1] = {
                     header = vname .. ' [' .. v.plate .. ']',

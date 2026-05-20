@@ -1,3 +1,6 @@
+local sharedItems = exports['qb-core']:GetShared('Items')
+local sharedWeapons = exports['qb-core']:GetShared('Weapons')
+
 local Casings = {}
 local BloodDrops = {}
 local FingerDrops = {}
@@ -47,7 +50,7 @@ end
 -- Callbacks
 
 QBCore.Functions.CreateCallback('police:GetPlayerStatus', function(_, cb, playerId)
-    local Player = QBCore.Functions.GetPlayer(playerId)
+    local Player = exports['qb-core']:GetPlayer(playerId)
     local statList = {}
     if Player then
         if PlayerStatus[Player.PlayerData.source] and next(PlayerStatus[Player.PlayerData.source]) then
@@ -77,7 +80,7 @@ end)
 
 RegisterNetEvent('evidence:server:CreateFingerDrop', function(coords)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     local fingerId = CreateFingerId()
     FingerDrops[fingerId] = Player.PlayerData.metadata['fingerprint']
     TriggerClientEvent('evidence:client:AddFingerPrint', -1, fingerId, Player.PlayerData.metadata['fingerprint'], coords)
@@ -96,7 +99,7 @@ RegisterNetEvent('evidence:server:AddBlooddropToInventory', function(bloodId, bl
     local src = source
     if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddBlooddropToInventory') then
         if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, bloodInfo, 'evidence:server:AddBlooddropToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
+            TriggerClientEvent('qb-inventory:client:ItemBox', src, sharedItems['filled_evidence_bag'], 'add')
             TriggerClientEvent('evidence:client:RemoveBlooddrop', -1, bloodId)
             BloodDrops[bloodId] = nil
         end
@@ -109,7 +112,7 @@ RegisterNetEvent('evidence:server:AddFingerprintToInventory', function(fingerId,
     local src = source
     if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddFingerprintToInventory') then
         if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, fingerInfo, 'evidence:server:AddFingerprintToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
+            TriggerClientEvent('qb-inventory:client:ItemBox', src, sharedItems['filled_evidence_bag'], 'add')
             TriggerClientEvent('evidence:client:RemoveFingerprint', -1, fingerId)
             FingerDrops[fingerId] = nil
         end
@@ -120,13 +123,13 @@ end)
 
 RegisterNetEvent('evidence:server:CreateCasing', function(weapon, coords)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if not Player then return end
     local casingId = CreateCasingId()
-    local weaponInfo = QBCore.Shared.Weapons[weapon]
+    local weaponInfo = sharedWeapons[weapon]
     local serieNumber = nil
     if weaponInfo then
-        local weaponItem = Player.Functions.GetItemByName(weaponInfo['name'])
+        local weaponItem = Player.GetItemByName(weaponInfo['name'])
         if weaponItem then
             if weaponItem.info and weaponItem.info ~= '' then
                 serieNumber = weaponItem.info.serie
@@ -149,7 +152,7 @@ RegisterNetEvent('evidence:server:AddCasingToInventory', function(casingId, casi
     local src = source
     if exports['qb-inventory']:RemoveItem(src, 'empty_evidence_bag', 1, false, 'evidence:server:AddCasingToInventory') then
         if exports['qb-inventory']:AddItem(src, 'filled_evidence_bag', 1, false, casingInfo, 'evidence:server:AddCasingToInventory') then
-            TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['filled_evidence_bag'], 'add')
+            TriggerClientEvent('qb-inventory:client:ItemBox', src, sharedItems['filled_evidence_bag'], 'add')
             TriggerClientEvent('evidence:client:RemoveCasing', -1, casingId)
             Casings[casingId] = nil
         end

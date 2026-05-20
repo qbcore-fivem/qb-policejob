@@ -1,3 +1,5 @@
+local sharedWeapons = exports['qb-core']:GetShared('Weapons')
+
 -- Variables
 local CurrentStatusList = {}
 local Casings = {}
@@ -250,7 +252,7 @@ CreateThread(function()
                         label = Lang:t('info.casing'),
                         type = 'casing',
                         street = streetLabel:gsub("%'", ''),
-                        ammolabel = Config.AmmoLabels[QBCore.Shared.Weapons[Casings[CurrentCasing].type]['ammotype']],
+                        ammolabel = Config.AmmoLabels[sharedWeapons[Casings[CurrentCasing].type]['ammotype']],
                         ammotype = Casings[CurrentCasing].type,
                         serie = Casings[CurrentCasing].serie
                     }

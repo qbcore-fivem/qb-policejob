@@ -1,5 +1,6 @@
 -- Variables
-QBCore = exports['qb-core']:GetCoreObject()
+QBCore = exports['qb-core']:GetCoreObject({ 'Functions', 'Commands' })
+local sharedWeapons = exports['qb-core']:GetShared('Weapons')
 local updatingCops = false
 
 -- Functions
@@ -68,13 +69,13 @@ QBCore.Functions.CreateCallback('police:GetCops', function(_, cb)
 end)
 
 QBCore.Functions.CreateCallback('police:server:isPlayerDead', function(_, cb, playerId)
-    local Player = QBCore.Functions.GetPlayer(playerId)
+    local Player = exports['qb-core']:GetPlayer(playerId)
     cb(Player.PlayerData.metadata['isdead'])
 end)
 
 QBCore.Functions.CreateCallback('police:IsSilencedWeapon', function(source, cb, weapon)
-    local Player = QBCore.Functions.GetPlayer(source)
-    local itemInfo = Player.Functions.GetItemByName(QBCore.Shared.Weapons[weapon]['name'])
+    local Player = exports['qb-core']:GetPlayer(source)
+    local itemInfo = Player.GetItemByName(sharedWeapons[weapon]['name'])
     local retval = false
     if itemInfo then
         if itemInfo.info and itemInfo.info.attachments then
@@ -115,7 +116,7 @@ end)
 
 RegisterNetEvent('qb-policejob:server:stash', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
     local citizenId = Player.PlayerData.citizenid
@@ -125,7 +126,7 @@ end)
 
 RegisterNetEvent('qb-policejob:server:trash', function()
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
     exports['qb-inventory']:OpenInventory(src, 'policetrash', {
@@ -136,7 +137,7 @@ end)
 
 RegisterNetEvent('qb-policejob:server:evidence', function(currentEvidence)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if not Player then return end
     if Player.PlayerData.job.type ~= 'leo' then return end
     exports['qb-inventory']:OpenInventory(src, currentEvidence, {
@@ -175,9 +176,9 @@ end)
 
 RegisterNetEvent('police:server:SetHandcuffStatus', function(isHandcuffed)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if Player then
-        Player.Functions.SetMetaData('ishandcuffed', isHandcuffed)
+        Player.SetMetaData('ishandcuffed', isHandcuffed)
     end
 end)
 
@@ -189,7 +190,7 @@ end)
 
 RegisterNetEvent('police:server:showFingerprintId', function(sessionId)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     local fid = Player.PlayerData.metadata['fingerprint']
     TriggerClientEvent('police:client:showFingerprintId', sessionId, fid)
     TriggerClientEvent('police:client:showFingerprintId', src, fid)
@@ -203,8 +204,8 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
     local targetCoords = GetEntityCoords(targetPed)
     if #(playerCoords - targetCoords) > 2.5 then return DropPlayer(src, 'Attempted exploit abuse') end
 
-    local Target = QBCore.Functions.GetPlayer(targetId)
-    if not QBCore.Functions.GetPlayer(src) or not Target then return end
+    local Target = exports['qb-core']:GetPlayer(targetId)
+    if not exports['qb-core']:GetPlayer(src) or not Target then return end
 
     local TrackerMeta = Target.PlayerData.metadata['tracker']
     if TrackerMeta then
@@ -221,7 +222,7 @@ RegisterNetEvent('police:server:SetTracker', function(targetId)
 end)
 
 RegisterNetEvent('police:server:SendTrackerLocation', function(coords, requestId)
-    local Target = QBCore.Functions.GetPlayer(source)
+    local Target = exports['qb-core']:GetPlayer(source)
     local msg = Lang:t('info.target_location', { firstname = Target.PlayerData.charinfo.firstname, lastname = Target.PlayerData.charinfo.lastname })
     local alertData = {
         title = Lang:t('info.anklet_location'),
@@ -257,17 +258,17 @@ end)
 
 QBCore.Functions.CreateUseableItem('handcuffs', function(source)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
-    if not Player.Functions.GetItemByName('handcuffs') then return end
+    local Player = exports['qb-core']:GetPlayer(src)
+    if not Player.GetItemByName('handcuffs') then return end
     TriggerClientEvent('police:client:CuffPlayerSoft', src)
 end)
 
 QBCore.Functions.CreateUseableItem('moneybag', function(source, item)
     local src = source
-    local Player = QBCore.Functions.GetPlayer(src)
+    local Player = exports['qb-core']:GetPlayer(src)
     if not Player then return end
-    if not Player.Functions.GetItemByName('moneybag') or not item.info or item.info == '' then return end
+    if not Player.GetItemByName('moneybag') or not item.info or item.info == '' then return end
     if not Player.PlayerData.job.type == 'leo' then return end
     if not exports['qb-inventory']:RemoveItem(src, 'moneybag', 1, item.slot, 'qb-policejob:moneybag') then return end
-    Player.Functions.AddMoney('cash', tonumber(item.info.cash), 'qb-policejob:moneybag')
+    Player.AddMoney('cash', tonumber(item.info.cash), 'qb-policejob:moneybag')
 end)

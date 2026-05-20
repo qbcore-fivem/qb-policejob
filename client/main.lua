@@ -1,5 +1,5 @@
 -- Variables
-QBCore = exports['qb-core']:GetCoreObject()
+QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
 isHandcuffed = false
 cuffType = 1
 isEscorted = false
@@ -108,17 +108,32 @@ RegisterNetEvent('QBCore:Client:SetDuty', function(newDuty)
     PlayerJob.onduty = newDuty
 end)
 
-RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    if JobInfo.type ~= 'leo' then
-        if DutyBlips then
-            for _, v in pairs(DutyBlips) do
-                RemoveBlip(v)
+RegisterNetEvent('QBCore:Client:OnPlayerUpdated', function(key, val)
+    if key == 'job' then
+        local JobInfo = val
+        if JobInfo.type ~= 'leo' then
+            if DutyBlips then
+                for _, v in pairs(DutyBlips) do
+                    RemoveBlip(v)
+                end
             end
+            DutyBlips = {}
         end
-        DutyBlips = {}
+        PlayerJob = JobInfo
+        TriggerServerEvent('police:server:UpdateBlips')
+    elseif key == 'all' then
+        local JobInfo = val.job
+        if JobInfo.type ~= 'leo' then
+            if DutyBlips then
+                for _, v in pairs(DutyBlips) do
+                    RemoveBlip(v)
+                end
+            end
+            DutyBlips = {}
+        end
+        PlayerJob = JobInfo
+        TriggerServerEvent('police:server:UpdateBlips')
     end
-    PlayerJob = JobInfo
-    TriggerServerEvent('police:server:UpdateBlips')
 end)
 
 RegisterNetEvent('police:client:sendBillingMail', function(amount)
