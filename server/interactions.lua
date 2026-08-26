@@ -202,6 +202,8 @@ RegisterNetEvent('police:server:RobPlayer', function(playerId)
     local Player = exports['qb-core']:GetPlayer(src)
     local SearchedPlayer = exports['qb-core']:GetPlayer(playerId)
     if not Player or not SearchedPlayer then return end
+    if Player.PlayerData.job.type ~= 'leo' or not Player.PlayerData.job.onduty then return end
+    if not (SearchedPlayer.PlayerData.metadata['ishandcuffed'] or SearchedPlayer.PlayerData.metadata['isdead'] or SearchedPlayer.PlayerData.metadata['inlaststand']) then return end
 
     local money = SearchedPlayer.PlayerData.money['cash']
     Player.AddMoney('cash', money, 'police-player-robbed')
